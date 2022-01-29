@@ -14,14 +14,14 @@
 					<span class="s-text">@lang('admin.include.dispatcher_panel')</span>
 				</a>
 			</li>
-			
-			<li>
+
+			{{-- <li>
 				<a href="{{ route('admin.heatmap') }}" class="waves-effect waves-light">
 					<span class="s-icon"><i class="ti-map"></i></span>
 					<span class="s-text">@lang('admin.include.heat_map')</span>
 				</a>
-			</li>
-			
+			</li> --}}
+
 			<li class="menu-title">@lang('admin.include.members')</li>
 			<li class="with-sub">
 				<a href="#" class="waves-effect  waves-light">
@@ -52,8 +52,11 @@
 					<span class="s-text">@lang('admin.include.dispatcher')</span>
 				</a>
 				<ul>
-					<li><a href="{{ route('admin.dispatch-manager.index') }}">@lang('admin.include.list_dispatcher')</a></li>
-					<li><a href="{{ route('admin.dispatch-manager.create') }}">@lang('admin.include.add_new_dispatcher')</a></li>
+					<li><a href="{{ route('admin.dispatch-manager.index') }}">@lang('admin.include.list_dispatcher')</a>
+					</li>
+					<li><a
+							href="{{ route('admin.dispatch-manager.create') }}">@lang('admin.include.add_new_dispatcher')</a>
+					</li>
 				</ul>
 			</li>
 			<li class="with-sub">
@@ -74,8 +77,12 @@
 					<span class="s-text">@lang('admin.include.account_manager')</span>
 				</a>
 				<ul>
-					<li><a href="{{ route('admin.account-manager.index') }}">@lang('admin.include.list_account_managers')</a></li>
-					<li><a href="{{ route('admin.account-manager.create') }}">@lang('admin.include.add_new_account_manager')</a></li>
+					<li><a
+							href="{{ route('admin.account-manager.index') }}">@lang('admin.include.list_account_managers')</a>
+					</li>
+					<li><a
+							href="{{ route('admin.account-manager.create') }}">@lang('admin.include.add_new_account_manager')</a>
+					</li>
 				</ul>
 			</li>
 			<li class="menu-title">@lang('admin.include.accounts')</li>
@@ -86,11 +93,18 @@
 					<span class="s-text">@lang('admin.include.statements')</span>
 				</a>
 				<ul>
-					<li><a href="{{ route('admin.ride.statement') }}">@lang('admin.include.overall_ride_statments')</a></li>
-					<li><a href="{{ route('admin.ride.statement.provider') }}">@lang('admin.include.provider_statement')</a></li>
-					<li><a href="{{ route('admin.ride.statement.today') }}">@lang('admin.include.daily_statement')</a></li>
-					<li><a href="{{ route('admin.ride.statement.monthly') }}">@lang('admin.include.monthly_statement')</a></li>
-					<li><a href="{{ route('admin.ride.statement.yearly') }}">@lang('admin.include.yearly_statement')</a></li>
+					<li><a href="{{ route('admin.ride.statement') }}">@lang('admin.include.overall_ride_statments')</a>
+					</li>
+					<li><a
+							href="{{ route('admin.ride.statement.provider') }}">@lang('admin.include.provider_statement')</a>
+					</li>
+					<li><a href="{{ route('admin.ride.statement.today') }}">@lang('admin.include.daily_statement')</a>
+					</li>
+					<li><a
+							href="{{ route('admin.ride.statement.monthly') }}">@lang('admin.include.monthly_statement')</a>
+					</li>
+					<li><a href="{{ route('admin.ride.statement.yearly') }}">@lang('admin.include.yearly_statement')</a>
+					</li>
 				</ul>
 			</li>
 			<li class="menu-title">@lang('admin.include.details')</li>
@@ -133,7 +147,8 @@
 				</a>
 				<ul>
 					<li><a href="{{ route('admin.service.index') }}">@lang('admin.include.list_service_types')</a></li>
-					<li><a href="{{ route('admin.service.create') }}">@lang('admin.include.add_new_service_type')</a></li>
+					<li><a href="{{ route('admin.service.create') }}">@lang('admin.include.add_new_service_type')</a>
+					</li>
 				</ul>
 			</li>
 			<li class="with-sub">
@@ -157,10 +172,10 @@
 				<ul>
 					<li><a href="{{ route('admin.promocode.index') }}">@lang('admin.include.list_promocodes')</a></li>
 					<li><a href="{{ route('admin.promocode.create') }}">
-					@lang('admin.include.add_new_promocode')</a></li>
+							@lang('admin.include.add_new_promocode')</a></li>
 				</ul>
 			</li>
-			
+
 			<li class="menu-title">@lang('admin.include.payment_details')</li>
 			<li>
 				<a href="{{ route('admin.payment') }}" class="waves-effect  waves-light">
@@ -181,7 +196,7 @@
 					<span class="s-text">@lang('admin.include.site_settings')</span>
 				</a>
 			</li>
-			
+
 			<li class="menu-title">@lang('admin.include.others')</li>
 			<li>
 				<a href="{{ route('admin.privacy') }}" class="waves-effect waves-light">
@@ -221,18 +236,17 @@
 				</a>
 			</li>
 			<li class="compact-hide">
-				<a href="{{ url('/admin/logout') }}"
-                            onclick="event.preventDefault();
+				<a href="{{ url('/admin/logout') }}" onclick="event.preventDefault();
                                      document.getElementById('logout-form').submit();">
 					<span class="s-icon"><i class="ti-power-off"></i></span>
 					<span class="s-text">@lang('admin.include.logout')</span>
-                </a>
+				</a>
 
-                <form id="logout-form" action="{{ url('/admin/logout') }}" method="POST" style="display: none;">
-                    {{ csrf_field() }}
-                </form>
+				<form id="logout-form" action="{{ url('/admin/logout') }}" method="POST" style="display: none;">
+					{{ csrf_field() }}
+				</form>
 			</li>
-			
+
 		</ul>
 	</div>
 </div>

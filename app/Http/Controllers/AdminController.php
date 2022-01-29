@@ -52,9 +52,11 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        try{
+        // dd('dashbaord');
+        // try{
 
-            $rides = UserRequests::has('user')->orderBy('id','desc')->get();
+            // $rides = UserRequests::has('user')->orderBy('id','desc')->get();
+            $rides = UserRequests::orderBy('id','desc')->get();
             $cancel_rides = UserRequests::where('status','CANCELLED');
             $scheduled_rides = UserRequests::where('status','SCHEDULED')->count();
             $user_cancelled = $cancel_rides->where('cancelled_by','USER')->count();
@@ -66,10 +68,11 @@ class AdminController extends Controller
             $providers = Provider::take(10)->orderBy('rating','desc')->get();
 
             return view('admin.dashboard',compact('providers','fleet','scheduled_rides','service','rides','user_cancelled','provider_cancelled','cancel_rides','revenue'));
-        }
-        catch(Exception $e){
-            return redirect()->route('admin.user.index')->with('flash_error','Something Went Wrong with Dashboard!');
-        }
+
+        // }
+        // catch(Exception $e){
+        //     return redirect()->route('admin.user.index')->with('flash_error','Something Went Wrong with Dashboard!');
+        // }
     }
 
 
