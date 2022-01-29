@@ -1,0 +1,31 @@
+Array
+(
+    [destination_addresses] => Array
+        (
+            [0] => 1903 W Michigan Ave, Kalamazoo, MI 49008, USA
+        )
+
+    [origin_addresses] => Array
+        (
+            [0] => 31.5104383,74.3525696
+        )
+
+    [rows] => Array
+        (
+            [0] => Array
+                (
+                    [elements] => Array
+                        (
+                            [0] => Array
+                                (
+                                    [status] => ZERO_RESULTS
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [status] => OK
+)

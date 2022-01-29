@@ -1,0 +1,311 @@
+Array
+(
+    [status] => DROPPED
+    [_method] => PATCH
+)
+App\UserRequests Object
+(
+    [fillable:protected] => Array
+        (
+            [0] => provider_id
+            [1] => user_id
+            [2] => current_provider_id
+            [3] => service_type_id
+            [4] => user_comment
+            [5] => status
+            [6] => cancelled_by
+            [7] => is_track
+            [8] => travel_time
+            [9] => distance
+            [10] => s_latitude
+            [11] => d_latitude
+            [12] => s_longitude
+            [13] => d_longitude
+            [14] => track_distance
+            [15] => track_latitude
+            [16] => track_longitude
+            [17] => paid
+            [18] => s_address
+            [19] => d_address
+            [20] => assigned_at
+            [21] => schedule_at
+            [22] => started_at
+            [23] => finished_at
+            [24] => use_wallet
+            [25] => user_rated
+            [26] => provider_rated
+            [27] => surge
+        )
+
+    [hidden:protected] => Array
+        (
+        )
+
+    [dates:protected] => Array
+        (
+            [0] => created_at
+            [1] => updated_at
+            [2] => deleted_at
+            [3] => assigned_at
+            [4] => schedule_at
+            [5] => started_at
+            [6] => finished_at
+        )
+
+    [connection:protected] => 
+    [table:protected] => 
+    [primaryKey:protected] => id
+    [keyType:protected] => int
+    [perPage:protected] => 15
+    [incrementing] => 1
+    [timestamps] => 1
+    [attributes:protected] => Array
+        (
+            [id] => 194
+            [booking_id] => TRNX992714
+            [user_id] => 114
+            [provider_id] => 116
+            [current_provider_id] => 116
+            [service_type_id] => 1
+            [user_comment] => 
+            [status] => DROPPED
+            [cancelled_by] => NONE
+            [cancel_reason] => 
+            [payment_mode] => CASH
+            [paid] => 0
+            [is_track] => NO
+            [distance] => 12.743
+            [travel_time] => 
+            [s_address] => virtual-force, MM Alam Rd, Block B2 Block B 2 Gulberg III, Lahore, Punjab, Pakistan
+            [s_latitude] => 31.5104383
+            [s_longitude] => 74.3525696
+            [d_address] => 
+            [d_latitude] => 31.5791113
+            [track_distance] => 0
+            [track_latitude] => 0
+            [track_longitude] => 0
+            [d_longitude] => 74.3604469
+            [assigned_at] => 2020-12-01 19:51:49
+            [schedule_at] => 
+            [started_at] => 2020-12-01 19:53:37
+            [finished_at] => 
+            [user_rated] => 0
+            [provider_rated] => 0
+            [use_wallet] => 0
+            [surge] => 0
+            [route_key] => wki_E_{xdMaBSyC_@JwFoAuAq@q@V_@L]@S@e@{BEHqAJiEE{AJoDL}AcFIaH]qFSiGSqFo@uAYg@CWByAR{@TiAx@c@f@qDhFcCpD]f@YZk@r@q@jAuF_Bi@EwCQoCOiCMgACqAK_AMm@OmEoBqDgBqAbEu@nCMI[BcAlDMTg@|A{A`Fy@dC_DfKCXCTsAjEsAtF]fBa@bB_@vAUhAKnAAdA@~@RpCJpABpAIzAK|@Qx@Up@S`@sBxD_AjAmBdDoBfD{E`Kw@d@[^WZI?AC?KFU|@aBFW`@_@j@}@bAgBjBgDtBmD|@{A\y@^w@RY@a@AUOWkCiC{AwAYM_E{Dq@s@eCsBkCcC_EuDwDqD}FaFgBoB{AiAyAqAaEyDiCoCi@c@i@[qMwLeKkJg@[qBcB_CkBsAeA_@_@q@E[EaAEs@DcBXg@NWNyCvBo@tAc@`AW`@mBnCeCdDuHtJuE~FmBlCwBlC}BxCc@l@{BtCu@dAiBjCaA`AoA`BwBdCmA`BILMMoAu@_CaBa@WwCmBqAu@gE}CgD}BgHsCwCmAuBu@g@Iq@@gBJwCRmAPqAF}@@mCDQAeAMBYGwDs@_JkAkQ{@uKyA_O_@kDa@N{BXoDh@MeCEu@
+            [deleted_at] => 
+            [created_at] => 2020-12-01 19:51:52
+            [updated_at] => 2020-12-01 19:53:37
+        )
+
+    [original:protected] => Array
+        (
+            [id] => 194
+            [booking_id] => TRNX992714
+            [user_id] => 114
+            [provider_id] => 116
+            [current_provider_id] => 116
+            [service_type_id] => 1
+            [user_comment] => 
+            [status] => PICKEDUP
+            [cancelled_by] => NONE
+            [cancel_reason] => 
+            [payment_mode] => CASH
+            [paid] => 0
+            [is_track] => NO
+            [distance] => 12.743
+            [travel_time] => 
+            [s_address] => virtual-force, MM Alam Rd, Block B2 Block B 2 Gulberg III, Lahore, Punjab, Pakistan
+            [s_latitude] => 31.5104383
+            [s_longitude] => 74.3525696
+            [d_address] => 
+            [d_latitude] => 31.5791113
+            [track_distance] => 0
+            [track_latitude] => 0
+            [track_longitude] => 0
+            [d_longitude] => 74.3604469
+            [assigned_at] => 2020-12-01 19:51:49
+            [schedule_at] => 
+            [started_at] => 2020-12-01 19:53:37
+            [finished_at] => 
+            [user_rated] => 0
+            [provider_rated] => 0
+            [use_wallet] => 0
+            [surge] => 0
+            [route_key] => wki_E_{xdMaBSyC_@JwFoAuAq@q@V_@L]@S@e@{BEHqAJiEE{AJoDL}AcFIaH]qFSiGSqFo@uAYg@CWByAR{@TiAx@c@f@qDhFcCpD]f@YZk@r@q@jAuF_Bi@EwCQoCOiCMgACqAK_AMm@OmEoBqDgBqAbEu@nCMI[BcAlDMTg@|A{A`Fy@dC_DfKCXCTsAjEsAtF]fBa@bB_@vAUhAKnAAdA@~@RpCJpABpAIzAK|@Qx@Up@S`@sBxD_AjAmBdDoBfD{E`Kw@d@[^WZI?AC?KFU|@aBFW`@_@j@}@bAgBjBgDtBmD|@{A\y@^w@RY@a@AUOWkCiC{AwAYM_E{Dq@s@eCsBkCcC_EuDwDqD}FaFgBoB{AiAyAqAaEyDiCoCi@c@i@[qMwLeKkJg@[qBcB_CkBsAeA_@_@q@E[EaAEs@DcBXg@NWNyCvBo@tAc@`AW`@mBnCeCdDuHtJuE~FmBlCwBlC}BxCc@l@{BtCu@dAiBjCaA`AoA`BwBdCmA`BILMMoAu@_CaBa@WwCmBqAu@gE}CgD}BgHsCwCmAuBu@g@Iq@@gBJwCRmAPqAF}@@mCDQAeAMBYGwDs@_JkAkQ{@uKyA_O_@kDa@N{BXoDh@MeCEu@
+            [deleted_at] => 
+            [created_at] => 2020-12-01 19:51:52
+            [updated_at] => 2020-12-01 19:53:37
+        )
+
+    [relations:protected] => Array
+        (
+            [user] => App\User Object
+                (
+                    [fillable:protected] => Array
+                        (
+                            [0] => first_name
+                            [1] => last_name
+                            [2] => gender
+                            [3] => email
+                            [4] => mobile
+                            [5] => picture
+                            [6] => password
+                            [7] => device_type
+                            [8] => device_token
+                            [9] => login_by
+                            [10] => payment_mode
+                            [11] => social_unique_id
+                            [12] => device_id
+                            [13] => wallet_balance
+                        )
+
+                    [hidden:protected] => Array
+                        (
+                            [0] => password
+                            [1] => remember_token
+                            [2] => created_at
+                        )
+
+                    [connection:protected] => 
+                    [table:protected] => 
+                    [primaryKey:protected] => id
+                    [keyType:protected] => int
+                    [perPage:protected] => 15
+                    [incrementing] => 1
+                    [timestamps] => 1
+                    [attributes:protected] => Array
+                        (
+                            [id] => 114
+                            [first_name] => Najaf
+                            [last_name] => Cheema
+                            [payment_mode] => CASH
+                            [email] => najaf@test.com
+                            [gender] => MALE
+                            [mobile] => 03214567897
+                            [password] => $2y$10$NwQP62vd/bdhsRBI9Vy4iOOuPgxY8TN1F0Oh7hcooYlkVENkWnBJm
+                            [picture] => 
+                            [device_token] => ey0Os1ofRsuvVP1sPpkvI0:APA91bF8NMb-80zG3aDcgEr_oVUk-qEG88hP1WXQCXL6huS6g0oVH5LQv5ZDf9fFANNk2jyAbWQt1viqlAuMfAXkcYwjtU1zaX_pA9kKUhNEFNFSWLXwQdQ2ObSSpO_HH8Exu5grsybM
+                            [device_id] => c62889178c95cc35
+                            [device_type] => android
+                            [login_by] => manual
+                            [social_unique_id] => 
+                            [latitude] => 
+                            [longitude] => 
+                            [stripe_cust_id] => 
+                            [wallet_balance] => 0
+                            [rating] => 5.00
+                            [otp] => 0
+                            [remember_token] => 
+                            [created_at] => 2020-12-01 19:45:26
+                            [updated_at] => 2020-12-01 19:51:52
+                        )
+
+                    [original:protected] => Array
+                        (
+                            [id] => 114
+                            [first_name] => Najaf
+                            [last_name] => Cheema
+                            [payment_mode] => CASH
+                            [email] => najaf@test.com
+                            [gender] => MALE
+                            [mobile] => 03214567897
+                            [password] => $2y$10$NwQP62vd/bdhsRBI9Vy4iOOuPgxY8TN1F0Oh7hcooYlkVENkWnBJm
+                            [picture] => 
+                            [device_token] => ey0Os1ofRsuvVP1sPpkvI0:APA91bF8NMb-80zG3aDcgEr_oVUk-qEG88hP1WXQCXL6huS6g0oVH5LQv5ZDf9fFANNk2jyAbWQt1viqlAuMfAXkcYwjtU1zaX_pA9kKUhNEFNFSWLXwQdQ2ObSSpO_HH8Exu5grsybM
+                            [device_id] => c62889178c95cc35
+                            [device_type] => android
+                            [login_by] => manual
+                            [social_unique_id] => 
+                            [latitude] => 
+                            [longitude] => 
+                            [stripe_cust_id] => 
+                            [wallet_balance] => 0
+                            [rating] => 5.00
+                            [otp] => 0
+                            [remember_token] => 
+                            [created_at] => 2020-12-01 19:45:26
+                            [updated_at] => 2020-12-01 19:51:52
+                        )
+
+                    [relations:protected] => Array
+                        (
+                        )
+
+                    [visible:protected] => Array
+                        (
+                        )
+
+                    [appends:protected] => Array
+                        (
+                        )
+
+                    [guarded:protected] => Array
+                        (
+                            [0] => *
+                        )
+
+                    [dates:protected] => Array
+                        (
+                        )
+
+                    [dateFormat:protected] => 
+                    [casts:protected] => Array
+                        (
+                        )
+
+                    [touches:protected] => Array
+                        (
+                        )
+
+                    [observables:protected] => Array
+                        (
+                        )
+
+                    [with:protected] => Array
+                        (
+                        )
+
+                    [exists] => 1
+                    [wasRecentlyCreated] => 
+                    [rememberTokenName:protected] => remember_token
+                    [accessToken:protected] => 
+                )
+
+        )
+
+    [visible:protected] => Array
+        (
+        )
+
+    [appends:protected] => Array
+        (
+        )
+
+    [guarded:protected] => Array
+        (
+            [0] => *
+        )
+
+    [dateFormat:protected] => 
+    [casts:protected] => Array
+        (
+        )
+
+    [touches:protected] => Array
+        (
+        )
+
+    [observables:protected] => Array
+        (
+        )
+
+    [with:protected] => Array
+        (
+        )
+
+    [exists] => 1
+    [wasRecentlyCreated] => 
+    [forceDeleting:protected] => 
+)
