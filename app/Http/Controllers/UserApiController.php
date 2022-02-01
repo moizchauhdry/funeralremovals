@@ -303,13 +303,13 @@ class UserApiController extends Controller
         $ActiveRequests = UserRequests::where('user_id', Auth::user()->id)
         ->whereNotIn('status' , ['CANCELLED', 'COMPLETED', 'SCHEDULED'])->count();
 
-        // if($ActiveRequests > 0) {
-        //     if($request->ajax()) {
-        //         return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
-        //     } else {
-        //         return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
-        //     }
-        // }
+        if($ActiveRequests > 0) {
+            if($request->ajax()) {
+                return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
+            } else {
+                return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
+            }
+        }
 
         // dd('step - 2');
 
