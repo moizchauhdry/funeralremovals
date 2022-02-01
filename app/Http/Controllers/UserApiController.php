@@ -282,6 +282,8 @@ class UserApiController extends Controller
 
     public function send_request(Request $request) {
 
+        // dd('step - 1');
+
         $this->validate($request, [
                 's_latitude' => 'required|numeric',
                 'd_latitude' => 'required|numeric',
@@ -295,19 +297,21 @@ class UserApiController extends Controller
                 'card_id' => ['required_if:payment_mode,CARD','exists:cards,card_id,user_id,'.Auth::user()->id],
             ]);
 
-        Log::info('New Request from User: '.Auth::user()->id);
-        Log::info('Request Details:', $request->all());
+        // Log::info('New Request from User: '.Auth::user()->id);
+        // Log::info('Request Details:', $request->all());
 
         $ActiveRequests = UserRequests::where('user_id', Auth::user()->id)
         ->whereNotIn('status' , ['CANCELLED', 'COMPLETED', 'SCHEDULED'])->count();
 
-        if($ActiveRequests > 0) {
-            if($request->ajax()) {
-                return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
-            } else {
-                return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
-            }
-        }
+        // if($ActiveRequests > 0) {
+        //     if($request->ajax()) {
+        //         return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
+        //     } else {
+        //         return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
+        //     }
+        // }
+
+        // dd('step - 2');
 
         if($request->has('schedule_date') && $request->has('schedule_time')){
             $beforeschedule_time = (new Carbon("$request->schedule_date $request->schedule_time"))->subHour(1);
@@ -334,30 +338,30 @@ class UserApiController extends Controller
         $longitude = $request->s_longitude;
         $service_type = $request->service_type;
 
-        $Providers = Provider::with('service')
-            ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
-            ->where('status', 'approved')
-            ->whereRaw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) <= $distance")
-            ->whereHas('service', function($query) use ($service_type){
-                        $query->where('status','active');
-                        $query->where('service_type_id',$service_type);
-                    })
-            ->orderBy('distance','asc')
-            ->take(10)
-            ->get();
+        // $Providers = Provider::with('service')
+        //     ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
+        //     ->where('status', 'approved')
+        //     ->whereRaw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) <= $distance")
+        //     ->whereHas('service', function($query) use ($service_type){
+        //                 $query->where('status','active');
+        //                 $query->where('service_type_id',$service_type);
+        //             })
+        //     ->orderBy('distance','asc')
+        //     ->take(10)
+        //     ->get();
 
         // List Providers who are currently busy and add them to the filter list.
 
-        if(count($Providers) == 0) {
-            if($request->ajax()) {
-                // Push Notification to User
-                return response()->json(['message' => trans('api.ride.no_providers_found')]); 
-            }else{
-                return back()->with('flash_success', 'No Providers Found! Please try again.');
-            }
-        }
+        // if(count($Providers) == 0) {
+        //     if($request->ajax()) {
+        //         // Push Notification to User
+        //         return response()->json(['message' => trans('api.ride.no_providers_found')]); 
+        //     }else{
+        //         return back()->with('flash_success', 'No Providers Found! Please try again.');
+        //     }
+        // }
 
-        try{
+        // try{
 
             $details = "https://maps.googleapis.com/maps/api/directions/json?origin=".$request->s_latitude.",".$request->s_longitude."&destination=".$request->d_latitude.",".$request->d_longitude."&mode=driving&key=".Setting::get('map_key');
 
@@ -371,11 +375,11 @@ class UserApiController extends Controller
             $UserRequest->booking_id = Helper::generate_booking_id();
             $UserRequest->user_id = Auth::user()->id;
             
-            if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
-                $UserRequest->current_provider_id = $Providers[0]->id;
-            }else{
+            // if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
+            //     $UserRequest->current_provider_id = $Providers[0]->id;
+            // }else{
                 $UserRequest->current_provider_id = 0;
-            }
+            // }
 
             $UserRequest->service_type_id = $request->service_type;
             $UserRequest->user_comment    = $request->user_comment;
@@ -404,68 +408,70 @@ class UserApiController extends Controller
             $UserRequest->assigned_at = Carbon::now();
             $UserRequest->route_key = $route_key;
 
-            if($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0){
-                $UserRequest->surge = 1;
-            }
+            // if($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0){
+            //     $UserRequest->surge = 1;
+            // }
 
             if($request->has('schedule_date') && $request->has('schedule_time')){
                 $UserRequest->schedule_at = date("Y-m-d H:i:s",strtotime("$request->schedule_date $request->schedule_time"));
             }
 
-             if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
-                Log::info('New Request id : '. $UserRequest->id .' Assigned to provider : '. $UserRequest->current_provider_id);
-                (new SendPushNotification)->IncomingRequest($Providers[0]->id);
-            }
+            //  if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
+            //     Log::info('New Request id : '. $UserRequest->id .' Assigned to provider : '. $UserRequest->current_provider_id);
+            //     (new SendPushNotification)->IncomingRequest($Providers[0]->id);
+            // }
 
             $UserRequest->save();
 
-
+            return response()->json(['response' => 'success'], 200);
            
 
             // update payment mode 
 
-            User::where('id',Auth::user()->id)->update(['payment_mode' => $request->payment_mode]);
+            // User::where('id',Auth::user()->id)->update(['payment_mode' => $request->payment_mode]);
 
-            if($request->has('card_id')){
+            // if($request->has('card_id')){
 
-                Card::where('user_id',Auth::user()->id)->update(['is_default' => 0]);
-                Card::where('card_id',$request->card_id)->update(['is_default' => 1]);
-            }
+            //     Card::where('user_id',Auth::user()->id)->update(['is_default' => 0]);
+            //     Card::where('card_id',$request->card_id)->update(['is_default' => 1]);
+            // }
 
-            if(Setting::get('manual_request',0) == 0){
-                foreach ($Providers as $key => $Provider) {
+            // if(Setting::get('manual_request',0) == 0){
+            //     foreach ($Providers as $key => $Provider) {
 
-                    if(Setting::get('broadcast_request',0) == 1){
-                       (new SendPushNotification)->IncomingRequest($Provider->id); 
-                    }
+            //         if(Setting::get('broadcast_request',0) == 1){
+            //            (new SendPushNotification)->IncomingRequest($Provider->id); 
+            //         }
 
-                    $Filter = new RequestFilter;
-                    // Send push notifications to the first provider
-                    // incoming request push to provider
+            //         $Filter = new RequestFilter;
+            //         // Send push notifications to the first provider
+            //         // incoming request push to provider
                     
-                    $Filter->request_id = $UserRequest->id;
-                    $Filter->provider_id = $Provider->id; 
-                    $Filter->save();
-                }
-            }
+            //         $Filter->request_id = $UserRequest->id;
+            //         $Filter->provider_id = $Provider->id; 
+            //         $Filter->save();
+            //     }
+            // }
 
-            if($request->ajax()) {
-                return response()->json([
-                        'message' => 'New request Created!',
-                        'request_id' => $UserRequest->id,
-                        'current_provider' => $UserRequest->current_provider_id,
-                    ]);
-            }else{
-                return redirect('dashboard');
-            }
+            // if($request->ajax()) {
+            //     return response()->json([
+            //             'message' => 'New request Created!',
+            //             'request_id' => $UserRequest->id,
+            //             'current_provider' => $UserRequest->current_provider_id,
+            //         ]);
+            // }else{
+            //     return redirect('dashboard');
+            // }
 
-        } catch (Exception $e) {
-            if($request->ajax()) {
-                return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
-                return back()->with('flash_error', 'Something went wrong while sending request. Please try again.');
-            }
-        }
+        // } catch (Exception $e) {
+        //     if($request->ajax()) {
+        //         return response()->json(['error' => trans('api.something_went_wrong')], 500);
+        //     }else{
+        //         return back()->with('flash_error', 'Something went wrong while sending request. Please try again.');
+        //     }
+        // }
+
+        // dd('final last success');
     }
 
 
