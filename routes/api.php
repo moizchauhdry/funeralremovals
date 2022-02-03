@@ -43,6 +43,7 @@ Route::group(['middleware' => ['auth:api']], function () {
 	Route::get('upcoming/trips' , 		'UserApiController@upcoming_trips');
 	Route::get('/trip/details' , 		'UserApiController@trip_details');
 	Route::get('upcoming/trip/details' ,'UserApiController@upcoming_trip_details');
+	Route::get('getHome' ,'UserApiController@getHome');
 	// payment
 	Route::post('/payment' , 	'PaymentController@payment');
 	Route::post('/add/money' , 	'PaymentController@add_money');
@@ -67,4 +68,4 @@ Route::group(['middleware' => ['auth:api']], function () {
 
 });
 
-Route::get('/getHome', 'API\HomeController@getHome');
+// Route::get('/getHome', 'API\HomeController@getHome');

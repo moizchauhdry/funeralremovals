@@ -1319,4 +1319,38 @@ class UserApiController extends Controller
 
     }
 
+    public function getHome()
+    {
+            $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
+            ->where('user_requests.status','COMPLETED')
+            ->orderBy('user_requests.created_at','desc')
+            ->select('user_requests.*')
+            ->with('payment','service_type')
+            ->take(3)
+            ->get();
+
+            if(!empty($UserRequests)){
+                $map_icon = asset('asset/img/marker-start.png');
+                foreach ($UserRequests as $key => $value) {
+                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
+                            "autoscale=1".
+                            "&size=320x130".
+                            "&maptype=terrian".
+                            "&format=png".
+                            "&visual_refresh=true".
+                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
+                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
+                            "&path=color:0x191919|weight:3|enc:".$value->route_key.
+                            "&key=".Setting::get('map_key');
+                }
+            }
+
+        $response['providers'] = Provider::orderBy('created_at','desc')->get();
+        $response['recent_pickups'] = $UserRequests;
+        
+        return response()->json([
+            'data' => $response, 
+        ]);
+    }
+
 }
