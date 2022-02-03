@@ -281,8 +281,6 @@ class UserApiController extends Controller
      */
 
     public function send_request(Request $request) {
-
-        dd('send_request');
         
         $this->validate($request, [
                 's_latitude' => 'required|numeric',
@@ -335,6 +333,9 @@ class UserApiController extends Controller
         $latitude = $request->s_latitude;
         $longitude = $request->s_longitude;
         $service_type = $request->service_type;
+
+                dd('send_request');
+
 
         $Providers = Provider::with('service')
             ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
