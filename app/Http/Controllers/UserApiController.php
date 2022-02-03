@@ -305,7 +305,7 @@ class UserApiController extends Controller
             if($request->ajax()) {
                 return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
             } else {
-                dd('Already request is in progress. Try again later');
+                // dd('Already request is in progress. Try again later');
                 return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
             }
         }
@@ -339,10 +339,10 @@ class UserApiController extends Controller
             ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
             ->where('status', 'approved')
             ->whereRaw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) <= $distance")
-            // ->whereHas('service', function($query) use ($service_type){
-            //             $query->where('status','active');
-            //             $query->where('service_type_id',$service_type);
-            //         })
+            ->whereHas('service', function($query) use ($service_type){
+                        $query->where('status','active');
+                        $query->where('service_type_id',$service_type);
+                    })
             ->orderBy('distance','asc')
             ->take(10)
             ->get();
