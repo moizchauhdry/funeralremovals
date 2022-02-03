@@ -282,6 +282,8 @@ class UserApiController extends Controller
 
     public function send_request(Request $request) {
 
+        dd('send_request');
+        
         $this->validate($request, [
                 's_latitude' => 'required|numeric',
                 'd_latitude' => 'required|numeric',
@@ -305,7 +307,6 @@ class UserApiController extends Controller
             if($request->ajax()) {
                 return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
             } else {
-                dd('Already request is in progress. Try again later');
                 return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
             }
         }
@@ -454,12 +455,7 @@ class UserApiController extends Controller
                         'current_provider' => $UserRequest->current_provider_id,
                     ]);
             }else{
-                return response()->json([
-                        'message' => 'New request Created!',
-                        'request_id' => $UserRequest->id,
-                        'current_provider' => $UserRequest->current_provider_id,
-                    ]);
-                // return redirect('dashboard');
+                return redirect('dashboard');
             }
 
         } catch (Exception $e) {
