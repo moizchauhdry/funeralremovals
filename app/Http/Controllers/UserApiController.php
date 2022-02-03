@@ -334,9 +334,6 @@ class UserApiController extends Controller
         $longitude = $request->s_longitude;
         $service_type = $request->service_type;
 
-                dd('send_request');
-
-
         $Providers = Provider::with('service')
             ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
             ->where('status', 'approved')
@@ -361,7 +358,10 @@ class UserApiController extends Controller
             }
         }
 
-        try{
+                        dd('send_request');
+
+
+        // try{
 
             $details = "https://maps.googleapis.com/maps/api/directions/json?origin=".$request->s_latitude.",".$request->s_longitude."&destination=".$request->d_latitude.",".$request->d_longitude."&mode=driving&key=".Setting::get('map_key');
 
@@ -449,23 +449,23 @@ class UserApiController extends Controller
                 }
             }
 
-            if($request->ajax()) {
-                return response()->json([
-                        'message' => 'New request Created!',
-                        'request_id' => $UserRequest->id,
-                        'current_provider' => $UserRequest->current_provider_id,
-                    ]);
-            }else{
-                return redirect('dashboard');
-            }
+            // if($request->ajax()) {
+            //     return response()->json([
+            //             'message' => 'New request Created!',
+            //             'request_id' => $UserRequest->id,
+            //             'current_provider' => $UserRequest->current_provider_id,
+            //         ]);
+            // }else{
+            //     return redirect('dashboard');
+            // }
 
-        } catch (Exception $e) {
-            if($request->ajax()) {
-                return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
-                return back()->with('flash_error', 'Something went wrong while sending request. Please try again.');
-            }
-        }
+        // } catch (Exception $e) {
+        //     if($request->ajax()) {
+        //         return response()->json(['error' => trans('api.something_went_wrong')], 500);
+        //     }else{
+        //         return back()->with('flash_error', 'Something went wrong while sending request. Please try again.');
+        //     }
+        // }
     }
 
 
