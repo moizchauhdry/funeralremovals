@@ -346,6 +346,9 @@ class UserApiController extends Controller
             ->take(10)
             ->get();
 
+                    dd('send_request');
+
+
 
         // List Providers who are currently busy and add them to the filter list.
 
@@ -357,8 +360,6 @@ class UserApiController extends Controller
                 return back()->with('flash_success', 'No Providers Found! Please try again.');
             }
         }
-
-        dd('send_request');
 
         // try{
 
