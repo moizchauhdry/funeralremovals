@@ -454,7 +454,12 @@ class UserApiController extends Controller
                         'current_provider' => $UserRequest->current_provider_id,
                     ]);
             }else{
-                return redirect('dashboard');
+                return response()->json([
+                        'message' => 'New request Created!',
+                        'request_id' => $UserRequest->id,
+                        'current_provider' => $UserRequest->current_provider_id,
+                    ]);
+                // return redirect('dashboard');
             }
 
         } catch (Exception $e) {
