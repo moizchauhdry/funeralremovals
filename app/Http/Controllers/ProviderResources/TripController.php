@@ -124,7 +124,6 @@ class TripController extends Controller
      */
 
     public function calculate_distance(Request $request, $id){
-        // dd('calculate_distance');
 
         $this->validate($request, [
                 'latitude' => 'required|numeric',
