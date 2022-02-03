@@ -305,7 +305,7 @@ class UserApiController extends Controller
             if($request->ajax()) {
                 return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
             } else {
-                // dd('Already request is in progress. Try again later');
+                dd('Already request is in progress. Try again later');
                 return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
             }
         }
