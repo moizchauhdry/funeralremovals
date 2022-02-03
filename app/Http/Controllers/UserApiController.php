@@ -358,8 +358,6 @@ class UserApiController extends Controller
             }
         }
 
-                        dd('send_request');
-
 
         // try{
 
@@ -422,6 +420,8 @@ class UserApiController extends Controller
             }
 
             $UserRequest->save();           
+
+                                    dd('send_request');
 
             // update payment mode 
             User::where('id',Auth::user()->id)->update(['payment_mode' => $request->payment_mode]);
