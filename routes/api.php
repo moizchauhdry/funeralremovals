@@ -11,6 +11,8 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
+
 Route::post('/signup' , 'UserApiController@signup');
 Route::post('/logout' , 'UserApiController@logout');
 Route::post('/verify' , 'UserApiController@verify');

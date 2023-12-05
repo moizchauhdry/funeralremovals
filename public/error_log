@@ -1,0 +1,30 @@
+[30-Sep-2023 17:29:12 UTC] PHP Fatal error:  Uncaught ErrorException: Method ReflectionParameter::getClass() is deprecated in /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php:809
+Stack trace:
+#0 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(809): Illuminate\Foundation\Bootstrap\HandleExceptions->handleError()
+#1 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(789): Illuminate\Container\Container->getDependencies()
+#2 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(644): Illuminate\Container\Container->build()
+#3 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(709): Illuminate\Container\Container->make()
+#4 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(231): Illuminate\Foundation\Application->make()
+#5 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(746): Illuminate\Container\Container->Illuminate\Container\{closure}()
+#6 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(644): Illuminate\Container\Container->build()
+#7 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(709): Illuminate\Container\Container->make()
+#8 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(154): Illuminate\Foundation\Application->make()
+#9 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(79): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#10 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->handleException()
+#11 {main}
+  thrown in /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 809
+[30-Sep-2023 17:29:14 UTC] PHP Fatal error:  Uncaught ErrorException: Method ReflectionParameter::getClass() is deprecated in /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php:809
+Stack trace:
+#0 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(809): Illuminate\Foundation\Bootstrap\HandleExceptions->handleError()
+#1 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(789): Illuminate\Container\Container->getDependencies()
+#2 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(644): Illuminate\Container\Container->build()
+#3 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(709): Illuminate\Container\Container->make()
+#4 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(231): Illuminate\Foundation\Application->make()
+#5 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(746): Illuminate\Container\Container->Illuminate\Container\{closure}()
+#6 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php(644): Illuminate\Container\Container->build()
+#7 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(709): Illuminate\Container\Container->make()
+#8 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(154): Illuminate\Foundation\Application->make()
+#9 /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(79): Illuminate\Foundation\Bootstrap\HandleExceptions->getExceptionHandler()
+#10 [internal function]: Illuminate\Foundation\Bootstrap\HandleExceptions->handleException()
+#11 {main}
+  thrown in /home/funeembn/public_html/vendor/laravel/framework/src/Illuminate/Container/Container.php on line 809

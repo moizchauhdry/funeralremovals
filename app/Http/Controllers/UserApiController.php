@@ -33,7 +33,7 @@ use App\PromocodePassbook;
 use App\ProviderService;
 use App\UserRequestRating;
 use App\Http\Controllers\ProviderResources\TripController;
-
+use Illuminate\Support\Facades\Validator;
 
 class UserApiController extends Controller
 {
@@ -45,21 +45,25 @@ class UserApiController extends Controller
 
     public function signup(Request $request)
     {
-        $this->validate($request, [
-                'social_unique_id' => ['required_if:login_by,facebook,google','unique:users'],
-                'device_type' => 'required|in:android,ios',
-                'device_token' => 'required',
-                'device_id' => 'required',
-                'login_by' => 'required|in:manual,facebook,google',
-                'first_name' => 'required|max:255',
-                'last_name' => 'required|max:255',
-                'email' => 'required|email|max:255|unique:users',
-                'mobile' => 'required',
-                'password' => 'required|min:6',
-            ]);
+        $validator = Validator::make($request->json()->all(), [
+            'social_unique_id' => ['required_if:login_by,facebook,google', 'unique:users'],
+            'device_type' => 'required|in:android,ios',
+            'device_token' => 'required',
+            'device_id' => 'required',
+            'login_by' => 'required|in:manual,facebook,google',
+            'first_name' => 'required|max:255',
+            'last_name' => 'required|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'mobile' => 'required',
+            'password' => 'required|min:6',
+        ]);
 
-        try{
-            
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+
             $User = $request->all();
 
             $User['referal_id'] = Helper::generate_referal_id();
@@ -69,7 +73,7 @@ class UserApiController extends Controller
 
             return $User;
         } catch (Exception $e) {
-             return response()->json(['error' => trans('api.something_went_wrong')], 500);
+            return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
 
@@ -82,7 +86,7 @@ class UserApiController extends Controller
     public function logout(Request $request)
     {
         try {
-            User::where('id', $request->id)->update(['device_id'=> '', 'device_token' => '']);
+            User::where('id', $request->id)->update(['device_id' => '', 'device_token' => '']);
             return response()->json(['message' => trans('api.logout_success')]);
         } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')], 500);
@@ -96,34 +100,32 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function change_password(Request $request){
+    public function change_password(Request $request)
+    {
 
         $this->validate($request, [
-                'password' => 'required|confirmed|min:6',
-                'old_password' => 'required',
-            ]);
+            'password' => 'required|confirmed|min:6',
+            'old_password' => 'required',
+        ]);
 
         $User = Auth::user();
 
-        if(Hash::check($request->old_password, $User->password))
-        {
+        if (Hash::check($request->old_password, $User->password)) {
             $User->password = bcrypt($request->password);
             $User->save();
 
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json(['message' => trans('api.user.password_updated')]);
-            }else{
+            } else {
                 return back()->with('flash_success', 'Password Updated');
             }
-
         } else {
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.user.change_password')], 500);
-            }else{
-                return back()->with('flash_error',trans('api.user.change_password'));
+            } else {
+                return back()->with('flash_error', trans('api.user.change_password'));
             }
         }
-
     }
 
     /**
@@ -132,27 +134,25 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function update_location(Request $request){
+    public function update_location(Request $request)
+    {
 
         $this->validate($request, [
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-            ]);
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
 
-        if($user = User::find(Auth::user()->id)){
+        if ($user = User::find(Auth::user()->id)) {
 
             $user->latitude = $request->latitude;
             $user->longitude = $request->longitude;
             $user->save();
 
             return response()->json(['message' => trans('api.user.location_updated')]);
-
-        }else{
+        } else {
 
             return response()->json(['error' => trans('api.user.user_not_found')], 500);
-
         }
-
     }
 
     /**
@@ -161,25 +161,26 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function details(Request $request){
+    public function details(Request $request)
+    {
 
         $this->validate($request, [
             'device_type' => 'in:android,ios',
         ]);
 
-        try{
+        try {
 
-            if($user = User::find(Auth::user()->id)){
+            if ($user = User::find(Auth::user()->id)) {
 
-                if($request->has('device_token')){
+                if ($request->has('device_token')) {
                     $user->device_token = $request->device_token;
                 }
 
-                if($request->has('device_type')){
+                if ($request->has('device_type')) {
                     $user->device_type = $request->device_type;
                 }
 
-                if($request->has('device_id')){
+                if ($request->has('device_id')) {
                     $user->device_id = $request->device_id;
                 }
 
@@ -188,15 +189,12 @@ class UserApiController extends Controller
                 $user->currency = Setting::get('currency');
                 $user->sos = Setting::get('sos_number', '911');
                 return $user;
-
             } else {
                 return response()->json(['error' => trans('api.user.user_not_found')], 500);
             }
-        }
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
-
     }
 
     /**
@@ -210,30 +208,30 @@ class UserApiController extends Controller
         dd($request->all());
 
         $this->validate($request, [
-                'first_name' => 'required|max:255',
-                'last_name' => 'max:255',
-                'email' => 'email|unique:users,email,'.Auth::user()->id,
-                'mobile' => 'required',
-                'picture' => 'mimes:jpeg,bmp,png',
-            ]);
+            'first_name' => 'required|max:255',
+            'last_name' => 'max:255',
+            'email' => 'email|unique:users,email,' . Auth::user()->id,
+            'mobile' => 'required',
+            'picture' => 'mimes:jpeg,bmp,png',
+        ]);
 
-         try {
+        try {
 
             $user = User::findOrFail(Auth::user()->id);
 
-            if($request->has('first_name')){ 
+            if ($request->has('first_name')) {
                 $user->first_name = $request->first_name;
             }
-            
-            if($request->has('last_name')){
+
+            if ($request->has('last_name')) {
                 $user->last_name = $request->last_name;
             }
-            
-            if($request->has('email')){
+
+            if ($request->has('email')) {
                 $user->email = $request->email;
             }
-        
-            if($request->has('mobile')){
+
+            if ($request->has('mobile')) {
                 $user->mobile = $request->mobile;
             }
 
@@ -244,17 +242,14 @@ class UserApiController extends Controller
 
             $user->save();
 
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json($user);
-            }else{
+            } else {
                 return back()->with('flash_success', trans('api.user.profile_updated'));
             }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => trans('api.user.user_not_found')], 500);
         }
-
-        catch (ModelNotFoundException $e) {
-             return response()->json(['error' => trans('api.user.user_not_found')], 500);
-        }
-
     }
 
     /**
@@ -263,14 +258,14 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function services() {
+    public function services()
+    {
 
-        if($serviceList = ServiceType::all()) {
+        if ($serviceList = ServiceType::all()) {
             return $serviceList;
         } else {
             return response()->json(['error' => trans('api.services_not_found')], 500);
         }
-
     }
 
 
@@ -280,53 +275,53 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function send_request(Request $request) {
-        
-        $this->validate($request, [
-                's_latitude' => 'required|numeric',
-                'd_latitude' => 'required|numeric',
-                's_longitude' => 'required|numeric',
-                'd_longitude' => 'required|numeric',
-                'service_type' => 'required|numeric|exists:service_types,id',
-                'promo_code' => 'exists:promocodes,promo_code',
-                'distance' => 'required|numeric',
-                'use_wallet' => 'numeric',
-                'payment_mode' => 'required|in:CASH,CARD,PAYPAL',
-                'card_id' => ['required_if:payment_mode,CARD','exists:cards,card_id,user_id,'.Auth::user()->id],
-            ]);
+    public function send_request(Request $request)
+    {
 
-        Log::info('New Request from User: '.Auth::user()->id);
+        $this->validate($request, [
+            's_latitude' => 'required|numeric',
+            'd_latitude' => 'required|numeric',
+            's_longitude' => 'required|numeric',
+            'd_longitude' => 'required|numeric',
+            'service_type' => 'required|numeric|exists:service_types,id',
+            'promo_code' => 'exists:promocodes,promo_code',
+            'distance' => 'required|numeric',
+            'use_wallet' => 'numeric',
+            'payment_mode' => 'required|in:CASH,CARD,PAYPAL',
+            'card_id' => ['required_if:payment_mode,CARD', 'exists:cards,card_id,user_id,' . Auth::user()->id],
+        ]);
+
+        Log::info('New Request from User: ' . Auth::user()->id);
         Log::info('Request Details:', $request->all());
 
         $ActiveRequests = UserRequests::where('user_id', Auth::user()->id)
-        ->whereNotIn('status' , ['CANCELLED', 'COMPLETED', 'SCHEDULED'])->count();
+            ->whereNotIn('status', ['CANCELLED', 'COMPLETED', 'SCHEDULED'])->count();
 
-        if($ActiveRequests > 0) {
-            if($request->ajax()) {
+        if ($ActiveRequests > 0) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.ride.request_inprogress')], 500);
             } else {
                 return redirect('dashboard')->with('flash_error', 'Already request is in progress. Try again later');
             }
         }
 
-        if($request->has('schedule_date') && $request->has('schedule_time')){
+        if ($request->has('schedule_date') && $request->has('schedule_time')) {
             $beforeschedule_time = (new Carbon("$request->schedule_date $request->schedule_time"))->subHour(1);
             $afterschedule_time = (new Carbon("$request->schedule_date $request->schedule_time"))->addHour(1);
 
-            $CheckScheduling = UserRequests::where('status','SCHEDULED')
-                            ->where('user_id', Auth::user()->id)
-                            ->whereBetween('schedule_at',[$beforeschedule_time,$afterschedule_time])
-                            ->count();
+            $CheckScheduling = UserRequests::where('status', 'SCHEDULED')
+                ->where('user_id', Auth::user()->id)
+                ->whereBetween('schedule_at', [$beforeschedule_time, $afterschedule_time])
+                ->count();
 
 
-            if($CheckScheduling > 0){
-                if($request->ajax()) {
+            if ($CheckScheduling > 0) {
+                if ($request->ajax()) {
                     return response()->json(['error' => trans('api.ride.request_scheduled')], 500);
-                }else{
+                } else {
                     return redirect('dashboard')->with('flash_error', 'Already request is Scheduled on this time.');
                 }
             }
-
         }
 
         $distance = Setting::get('provider_search_radius', '10');
@@ -335,27 +330,27 @@ class UserApiController extends Controller
         $service_type = $request->service_type;
 
         $Providers = Provider::with('service')
-            ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"),'id')
+            ->select(DB::Raw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) AS distance"), 'id')
             ->where('status', 'approved')
             ->whereRaw("(6371 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) <= $distance")
-            ->whereHas('service', function($query) use ($service_type){
-                        $query->where('status','active');
-                        $query->where('service_type_id',$service_type);
-                    })
-            ->orderBy('distance','asc')
+            ->whereHas('service', function ($query) use ($service_type) {
+                $query->where('status', 'active');
+                $query->where('service_type_id', $service_type);
+            })
+            ->orderBy('distance', 'asc')
             ->take(10)
             ->get();
 
-                    // dd('success');
+        // dd('success');
 
 
         // List Providers who are currently busy and add them to the filter list.
 
-        if(count($Providers) == 0) {
-            if($request->ajax()) {
+        if (count($Providers) == 0) {
+            if ($request->ajax()) {
                 // Push Notification to User
-                return response()->json(['message' => trans('api.ride.no_providers_found')]); 
-            }else{
+                return response()->json(['message' => trans('api.ride.no_providers_found')]);
+            } else {
                 return back()->with('flash_success', 'No Providers Found! Please try again.');
             }
         }
@@ -364,101 +359,101 @@ class UserApiController extends Controller
 
         // try{
 
-            $details = "https://maps.googleapis.com/maps/api/directions/json?origin=".$request->s_latitude.",".$request->s_longitude."&destination=".$request->d_latitude.",".$request->d_longitude."&mode=driving&key=".Setting::get('map_key');
+        $details = "https://maps.googleapis.com/maps/api/directions/json?origin=" . $request->s_latitude . "," . $request->s_longitude . "&destination=" . $request->d_latitude . "," . $request->d_longitude . "&mode=driving&key=" . Setting::get('map_key');
 
-            $json = curl($details);
+        $json = curl($details);
 
-            $details = json_decode($json, TRUE);
+        $details = json_decode($json, TRUE);
 
-            $route_key = $details['routes'][0]['overview_polyline']['points'];
+        $route_key = $details['routes'][0]['overview_polyline']['points'];
 
-            $UserRequest = new UserRequests;
-            $UserRequest->booking_id = Helper::generate_booking_id();
-            $UserRequest->user_id = Auth::user()->id;
-            
-            if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
-                $UserRequest->current_provider_id = $Providers[0]->id;
-            }else{
-                $UserRequest->current_provider_id = 0;
-            }
+        $UserRequest = new UserRequests;
+        $UserRequest->booking_id = Helper::generate_booking_id();
+        $UserRequest->user_id = Auth::user()->id;
 
-            $UserRequest->service_type_id = $request->service_type;
-            $UserRequest->user_comment    = $request->user_comment;
-            $UserRequest->payment_mode = $request->payment_mode;
-            
-            $UserRequest->status = 'SEARCHING';
+        if ((Setting::get('manual_request', 0) == 0) && (Setting::get('broadcast_request', 0) == 0)) {
+            $UserRequest->current_provider_id = $Providers[0]->id;
+        } else {
+            $UserRequest->current_provider_id = 0;
+        }
 
-            $UserRequest->s_address = $request->s_address ? : "";
-            $UserRequest->d_address = $request->d_address ? : "";
+        $UserRequest->service_type_id = $request->service_type;
+        $UserRequest->user_comment    = $request->user_comment;
+        $UserRequest->payment_mode = $request->payment_mode;
 
-            $UserRequest->s_latitude = $request->s_latitude;
-            $UserRequest->s_longitude = $request->s_longitude;
+        $UserRequest->status = 'SEARCHING';
 
-            $UserRequest->d_latitude = $request->d_latitude;
-            $UserRequest->d_longitude = $request->d_longitude;
-            $UserRequest->distance = $request->distance;
+        $UserRequest->s_address = $request->s_address ?: "";
+        $UserRequest->d_address = $request->d_address ?: "";
 
-            if(Auth::user()->wallet_balance > 0){
-                $UserRequest->use_wallet = $request->use_wallet ? : 0;
-            }
+        $UserRequest->s_latitude = $request->s_latitude;
+        $UserRequest->s_longitude = $request->s_longitude;
 
-            if(Setting::get('track_distance', 0) == 1){
-                $UserRequest->is_track = "YES";
-            }
+        $UserRequest->d_latitude = $request->d_latitude;
+        $UserRequest->d_longitude = $request->d_longitude;
+        $UserRequest->distance = $request->distance;
 
-            $UserRequest->assigned_at = Carbon::now();
-            $UserRequest->route_key = $route_key;
+        if (Auth::user()->wallet_balance > 0) {
+            $UserRequest->use_wallet = $request->use_wallet ?: 0;
+        }
 
-            if($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0){
-                $UserRequest->surge = 1;
-            }
+        if (Setting::get('track_distance', 0) == 1) {
+            $UserRequest->is_track = "YES";
+        }
 
-            if($request->has('schedule_date') && $request->has('schedule_time')){
-                $UserRequest->schedule_at = date("Y-m-d H:i:s",strtotime("$request->schedule_date $request->schedule_time"));
-            }
+        $UserRequest->assigned_at = Carbon::now();
+        $UserRequest->route_key = $route_key;
 
-             if((Setting::get('manual_request',0) == 0) && (Setting::get('broadcast_request',0) == 0)){
-                Log::info('New Request id : '. $UserRequest->id .' Assigned to provider : '. $UserRequest->current_provider_id);
-                (new SendPushNotification)->IncomingRequest($Providers[0]->id);
-            }
+        if ($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0) {
+            $UserRequest->surge = 1;
+        }
 
-            $UserRequest->save();           
+        if ($request->has('schedule_date') && $request->has('schedule_time')) {
+            $UserRequest->schedule_at = date("Y-m-d H:i:s", strtotime("$request->schedule_date $request->schedule_time"));
+        }
 
-            // update payment mode 
-            User::where('id',Auth::user()->id)->update(['payment_mode' => $request->payment_mode]);
+        if ((Setting::get('manual_request', 0) == 0) && (Setting::get('broadcast_request', 0) == 0)) {
+            Log::info('New Request id : ' . $UserRequest->id . ' Assigned to provider : ' . $UserRequest->current_provider_id);
+            (new SendPushNotification)->IncomingRequest($Providers[0]->id);
+        }
 
-            if($request->has('card_id')){
+        $UserRequest->save();
 
-                Card::where('user_id',Auth::user()->id)->update(['is_default' => 0]);
-                Card::where('card_id',$request->card_id)->update(['is_default' => 1]);
-            }
+        // update payment mode 
+        User::where('id', Auth::user()->id)->update(['payment_mode' => $request->payment_mode]);
 
-            if(Setting::get('manual_request',0) == 0){
-                foreach ($Providers as $key => $Provider) {
+        if ($request->has('card_id')) {
 
-                    if(Setting::get('broadcast_request',0) == 1){
-                       (new SendPushNotification)->IncomingRequest($Provider->id); 
-                    }
+            Card::where('user_id', Auth::user()->id)->update(['is_default' => 0]);
+            Card::where('card_id', $request->card_id)->update(['is_default' => 1]);
+        }
 
-                    $Filter = new RequestFilter;
-                    // Send push notifications to the first provider
-                    // incoming request push to provider
-                    
-                    $Filter->request_id = $UserRequest->id;
-                    $Filter->provider_id = $Provider->id; 
-                    $Filter->save();
+        if (Setting::get('manual_request', 0) == 0) {
+            foreach ($Providers as $key => $Provider) {
+
+                if (Setting::get('broadcast_request', 0) == 1) {
+                    (new SendPushNotification)->IncomingRequest($Provider->id);
                 }
-            }
 
-            // if($request->ajax()) {
-            //     return response()->json([
-            //             'message' => 'New request Created!',
-            //             'request_id' => $UserRequest->id,
-            //             'current_provider' => $UserRequest->current_provider_id,
-            //         ]);
-            // }else{
-            //     return redirect('dashboard');
-            // }
+                $Filter = new RequestFilter;
+                // Send push notifications to the first provider
+                // incoming request push to provider
+
+                $Filter->request_id = $UserRequest->id;
+                $Filter->provider_id = $Provider->id;
+                $Filter->save();
+            }
+        }
+
+        // if($request->ajax()) {
+        //     return response()->json([
+        //             'message' => 'New request Created!',
+        //             'request_id' => $UserRequest->id,
+        //             'current_provider' => $UserRequest->current_provider_id,
+        //         ]);
+        // }else{
+        //     return redirect('dashboard');
+        // }
 
         // } catch (Exception $e) {
         //     if($request->ajax()) {
@@ -476,30 +471,30 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function cancel_request(Request $request) {
+    public function cancel_request(Request $request)
+    {
 
         $this->validate($request, [
-            'request_id' => 'required|numeric|exists:user_requests,id,user_id,'.Auth::user()->id,
+            'request_id' => 'required|numeric|exists:user_requests,id,user_id,' . Auth::user()->id,
         ]);
 
-        try{
+        try {
 
             $UserRequest = UserRequests::findOrFail($request->request_id);
 
-            if($UserRequest->status == 'CANCELLED')
-            {
-                if($request->ajax()) {
-                    return response()->json(['error' => trans('api.ride.already_cancelled')], 500); 
-                }else{
+            if ($UserRequest->status == 'CANCELLED') {
+                if ($request->ajax()) {
+                    return response()->json(['error' => trans('api.ride.already_cancelled')], 500);
+                } else {
                     return back()->with('flash_error', 'Request is Already Cancelled!');
                 }
             }
 
-            if(in_array($UserRequest->status, ['SEARCHING','STARTED','ARRIVED','SCHEDULED'])) {
+            if (in_array($UserRequest->status, ['SEARCHING', 'STARTED', 'ARRIVED', 'SCHEDULED'])) {
 
-                if($UserRequest->status != 'SEARCHING'){
+                if ($UserRequest->status != 'SEARCHING') {
                     $this->validate($request, [
-                        'cancel_reason'=> 'max:255',
+                        'cancel_reason' => 'max:255',
                     ]);
                 }
 
@@ -510,41 +505,36 @@ class UserApiController extends Controller
 
                 RequestFilter::where('request_id', $UserRequest->id)->delete();
 
-                if($UserRequest->status != 'SCHEDULED'){
+                if ($UserRequest->status != 'SCHEDULED') {
 
-                    if($UserRequest->provider_id != 0){
+                    if ($UserRequest->provider_id != 0) {
 
-                        ProviderService::where('provider_id',$UserRequest->provider_id)->update(['status' => 'active']);
-
+                        ProviderService::where('provider_id', $UserRequest->provider_id)->update(['status' => 'active']);
                     }
                 }
 
-                 // Send Push Notification to User
+                // Send Push Notification to User
                 (new SendPushNotification)->UserCancellRide($UserRequest);
 
-                if($request->ajax()) {
-                    return response()->json(['message' => trans('api.ride.ride_cancelled')]); 
-                }else{
-                    return redirect('dashboard')->with('flash_success','Request Cancelled Successfully');
+                if ($request->ajax()) {
+                    return response()->json(['message' => trans('api.ride.ride_cancelled')]);
+                } else {
+                    return redirect('dashboard')->with('flash_success', 'Request Cancelled Successfully');
                 }
-
             } else {
-                if($request->ajax()) {
-                    return response()->json(['error' => trans('api.ride.already_onride')], 500); 
-                }else{
+                if ($request->ajax()) {
+                    return response()->json(['error' => trans('api.ride.already_onride')], 500);
+                } else {
                     return back()->with('flash_error', 'Service Already Started!');
                 }
             }
-        }
-
-        catch (ModelNotFoundException $e) {
-            if($request->ajax()) {
+        } catch (ModelNotFoundException $e) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')]);
-            }else{
+            } else {
                 return back()->with('flash_error', 'No Request Found!');
             }
         }
-
     }
 
     /**
@@ -553,46 +543,46 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function request_status_check() {
+    public function request_status_check()
+    {
 
-        try{
+        try {
             $check_status = ['CANCELLED', 'SCHEDULED'];
 
             $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.user_rated',0)
-            ->whereNotIn('user_requests.status', $check_status)
-            ->select('user_requests.*')
-            ->with('user','provider','service_type','provider_service','rating','payment')
-            ->get();
-                                        
+                ->where('user_requests.user_rated', 0)
+                ->whereNotIn('user_requests.status', $check_status)
+                ->select('user_requests.*')
+                ->with('user', 'provider', 'service_type', 'provider_service', 'rating', 'payment')
+                ->get();
 
-            $search_status = ['SEARCHING','SCHEDULED'];
+
+            $search_status = ['SEARCHING', 'SCHEDULED'];
             $UserRequestsFilter = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.user_rated',0)
-            ->where('user_requests.provider_id',0)
-            ->whereIn('user_requests.status', $search_status)
-            ->select('user_requests.*')
-            ->with('filter')
-            ->get(); 
+                ->where('user_requests.user_rated', 0)
+                ->where('user_requests.provider_id', 0)
+                ->whereIn('user_requests.status', $search_status)
+                ->select('user_requests.*')
+                ->with('filter')
+                ->get();
 
             Log::info($UserRequestsFilter);
 
             $Timeout = Setting::get('provider_select_timeout', 180);
 
-            if(!empty($UserRequestsFilter)){
-                for ($i=0; $i < sizeof($UserRequestsFilter); $i++) {
+            if (!empty($UserRequestsFilter)) {
+                for ($i = 0; $i < sizeof($UserRequestsFilter); $i++) {
                     $ExpiredTime = $Timeout - (time() - strtotime($UserRequestsFilter[$i]->assigned_at));
-                    if($UserRequestsFilter[$i]->status == 'SEARCHING' && $ExpiredTime < 0) {
+                    if ($UserRequestsFilter[$i]->status == 'SEARCHING' && $ExpiredTime < 0) {
                         $Providertrip = new TripController();
                         $Providertrip->assign_next_provider($UserRequestsFilter[$i]->id);
-                    }else if($UserRequestsFilter[$i]->status == 'SEARCHING' && $ExpiredTime > 0){
+                    } else if ($UserRequestsFilter[$i]->status == 'SEARCHING' && $ExpiredTime > 0) {
                         break;
                     }
                 }
             }
 
             return response()->json(['data' => $UserRequests]);
-
         } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
@@ -605,44 +595,45 @@ class UserApiController extends Controller
      */
 
 
-    public function rate_provider(Request $request) {
+    public function rate_provider(Request $request)
+    {
 
         $this->validate($request, [
-                'request_id' => 'required|integer|exists:user_requests,id,user_id,'.Auth::user()->id,
-                'rating' => 'required|integer|in:1,2,3,4,5',
-                'comment' => 'max:255',
-            ]);
-    
-        $UserRequests = UserRequests::where('id' ,$request->request_id)
-                ->where('status' ,'COMPLETED')
-                ->where('paid', 0)
-                ->first();
+            'request_id' => 'required|integer|exists:user_requests,id,user_id,' . Auth::user()->id,
+            'rating' => 'required|integer|in:1,2,3,4,5',
+            'comment' => 'max:255',
+        ]);
+
+        $UserRequests = UserRequests::where('id', $request->request_id)
+            ->where('status', 'COMPLETED')
+            ->where('paid', 0)
+            ->first();
 
         if ($UserRequests) {
-            if($request->ajax()){
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.user.not_paid')], 500);
             } else {
                 return back()->with('flash_error', 'Service Already Started!');
             }
         }
 
-        try{
+        try {
 
             $UserRequest = UserRequests::findOrFail($request->request_id);
-            
-            if($UserRequest->rating == null) {
+
+            if ($UserRequest->rating == null) {
                 UserRequestRating::create([
-                        'provider_id' => $UserRequest->provider_id,
-                        'user_id' => $UserRequest->user_id,
-                        'request_id' => $UserRequest->id,
-                        'user_rating' => $request->rating,
-                        'user_comment' => $request->comment,
-                    ]);
+                    'provider_id' => $UserRequest->provider_id,
+                    'user_id' => $UserRequest->user_id,
+                    'request_id' => $UserRequest->id,
+                    'user_rating' => $request->rating,
+                    'user_comment' => $request->comment,
+                ]);
             } else {
                 $UserRequest->rating->update([
-                        'user_rating' => $request->rating,
-                        'user_comment' => $request->comment,
-                    ]);
+                    'user_rating' => $request->rating,
+                    'user_comment' => $request->comment,
+                ]);
             }
 
             $UserRequest->user_rated = 1;
@@ -650,22 +641,21 @@ class UserApiController extends Controller
 
             $average = UserRequestRating::where('provider_id', $UserRequest->provider_id)->avg('user_rating');
 
-            Provider::where('id',$UserRequest->provider_id)->update(['rating' => $average]);
+            Provider::where('id', $UserRequest->provider_id)->update(['rating' => $average]);
 
             // Send Push Notification to Provider 
-            if($request->ajax()){
-                return response()->json(['message' => trans('api.ride.provider_rated')]); 
-            }else{
+            if ($request->ajax()) {
+                return response()->json(['message' => trans('api.ride.provider_rated')]);
+            } else {
                 return redirect('dashboard')->with('flash_success', 'Driver Rated Successfully!');
             }
         } catch (Exception $e) {
-            if($request->ajax()){
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
+            } else {
                 return back()->with('flash_error', 'Something went wrong');
             }
         }
-
     }
 
     /**
@@ -675,38 +665,38 @@ class UserApiController extends Controller
      */
 
 
-    public function modifiy_request(Request $request) {
+    public function modifiy_request(Request $request)
+    {
 
         $this->validate($request, [
-                'request_id' => 'required|integer|exists:user_requests,id,user_id,'.Auth::user()->id,
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-                'address' => 'required'
-            ]);
+            'request_id' => 'required|integer|exists:user_requests,id,user_id,' . Auth::user()->id,
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'address' => 'required'
+        ]);
 
-        try{
+        try {
 
             $UserRequest = UserRequests::findOrFail($request->request_id);
-            $UserRequest->d_latitude = $request->latitude?:$UserRequest->d_latitude;
-            $UserRequest->d_longitude = $request->longitude?:$UserRequest->d_longitude;
-            $UserRequest->d_address =  $request->address?:$UserRequest->d_address;
+            $UserRequest->d_latitude = $request->latitude ?: $UserRequest->d_latitude;
+            $UserRequest->d_longitude = $request->longitude ?: $UserRequest->d_longitude;
+            $UserRequest->d_address =  $request->address ?: $UserRequest->d_address;
             $UserRequest->save();
 
             // Send Push Notification to Provider 
-            if($request->ajax()){
-                return response()->json(['message' => trans('api.ride.request_modify_location')]); 
-            }else{
+            if ($request->ajax()) {
+                return response()->json(['message' => trans('api.ride.request_modify_location')]);
+            } else {
                 return redirect('dashboard')->with('flash_success', 'User Changed Destination Address Successfully!');
             }
         } catch (Exception $e) {
-            if($request->ajax()){
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
+            } else {
                 return back()->with('flash_error', 'Something went wrong');
             }
         }
-
-    } 
+    }
 
 
     /**
@@ -715,34 +705,33 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function trips() {
-    
-        try{
+    public function trips()
+    {
+
+        try {
             $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.status','COMPLETED')
-            ->orderBy('user_requests.created_at','desc')
-            ->select('user_requests.*')
-            ->with('payment','service_type')
-            ->get();
-            if(!empty($UserRequests)){
+                ->where('user_requests.status', 'COMPLETED')
+                ->orderBy('user_requests.created_at', 'desc')
+                ->select('user_requests.*')
+                ->with('payment', 'service_type')
+                ->get();
+            if (!empty($UserRequests)) {
                 $map_icon = asset('asset/img/marker-start.png');
                 foreach ($UserRequests as $key => $value) {
-                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
-                            "autoscale=1".
-                            "&size=320x130".
-                            "&maptype=terrian".
-                            "&format=png".
-                            "&visual_refresh=true".
-                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
-                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
-                            "&path=color:0x191919|weight:3|enc:".$value->route_key.
-                            "&key=".Setting::get('map_key');
+                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?" .
+                        "autoscale=1" .
+                        "&size=320x130" .
+                        "&maptype=terrian" .
+                        "&format=png" .
+                        "&visual_refresh=true" .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->s_latitude . "," . $value->s_longitude .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->d_latitude . "," . $value->d_longitude .
+                        "&path=color:0x191919|weight:3|enc:" . $value->route_key .
+                        "&key=" . Setting::get('map_key');
                 }
             }
             return $UserRequests;
-        }
-
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')]);
         }
     }
@@ -753,19 +742,20 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function estimated_fare(Request $request){
+    public function estimated_fare(Request $request)
+    {
         \Log::info('Estimate', $request->all());
-        $this->validate($request,[
-                's_latitude' => 'required|numeric',
-                's_longitude' => 'required|numeric',
-                'd_latitude' => 'required|numeric',
-                'd_longitude' => 'required|numeric',
-                'service_type' => 'required|numeric|exists:service_types,id',
-            ]);
+        $this->validate($request, [
+            's_latitude' => 'required|numeric',
+            's_longitude' => 'required|numeric',
+            'd_latitude' => 'required|numeric',
+            'd_longitude' => 'required|numeric',
+            'service_type' => 'required|numeric|exists:service_types,id',
+        ]);
 
-        try{
+        try {
 
-            $details = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=".$request->s_latitude.",".$request->s_longitude."&destinations=".$request->d_latitude.",".$request->d_longitude."&mode=driving&sensor=false&key=".Setting::get('map_key');
+            $details = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" . $request->s_latitude . "," . $request->s_longitude . "&destinations=" . $request->d_latitude . "," . $request->d_longitude . "&mode=driving&sensor=false&key=" . Setting::get('map_key');
 
             $json = curl($details);
 
@@ -775,30 +765,30 @@ class UserApiController extends Controller
             $time = $details['rows'][0]['elements'][0]['duration']['text'];
             $seconds = $details['rows'][0]['elements'][0]['duration']['value'];
 
-            $kilometer = $meter/(float) 1000;
-            $minutes = round($seconds/60);
+            $kilometer = $meter / (float) 1000;
+            $minutes = round($seconds / 60);
 
             $tax_percentage = Setting::get('tax_percentage');
             $commission_percentage = Setting::get('commission_percentage');
             $service_type = ServiceType::findOrFail($request->service_type);
-            
+
             $price = $service_type->fixed;
 
-            if($service_type->calculator == 'MIN') {
+            if ($service_type->calculator == 'MIN') {
                 $price += $service_type->minute * $minutes;
-            } else if($service_type->calculator == 'HOUR') {
+            } else if ($service_type->calculator == 'HOUR') {
                 $price += $service_type->minute * 60;
-            } else if($service_type->calculator == 'DISTANCE') {
+            } else if ($service_type->calculator == 'DISTANCE') {
                 $price += ($kilometer * $service_type->price);
-            } else if($service_type->calculator == 'DISTANCEMIN') {
+            } else if ($service_type->calculator == 'DISTANCEMIN') {
                 $price += ($kilometer * $service_type->price) + ($service_type->minute * $minutes);
-            } else if($service_type->calculator == 'DISTANCEHOUR') {
+            } else if ($service_type->calculator == 'DISTANCEHOUR') {
                 $price += ($kilometer * $service_type->price) + ($service_type->minute * $minutes * 60);
             } else {
                 $price += ($kilometer * $service_type->price);
             }
 
-            $tax_price = ( $tax_percentage/100 ) * $price;
+            $tax_price = ($tax_percentage / 100) * $price;
             $total = $price + $tax_price;
 
             $ActiveProviders = ProviderService::where('service_type_id', $request->service_type)->where('status', 'active')->get();
@@ -812,31 +802,30 @@ class UserApiController extends Controller
                 ->get();
 
             $surge = 0;
-            
-            if($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0){
-                $surge_price = (Setting::get('surge_percentage')/100) * $total;
+
+            if ($Providers->count() <= Setting::get('surge_trigger') && $Providers->count() > 0) {
+                $surge_price = (Setting::get('surge_percentage') / 100) * $total;
                 $total += $surge_price;
                 $surge = 1;
             }
 
             /*
             * Reported by Jeya, previously it was hardcoded. we have changed as based on surge percentage.
-            */ 
-            $surge_percentage = 1+(Setting::get('surge_percentage')/100)."X";
+            */
+            $surge_percentage = 1 + (Setting::get('surge_percentage') / 100) . "X";
 
 
             return response()->json([
-                    'estimated_fare' => round($total,2), 
-                    'distance' => $kilometer,
-                    'time' => $time,
-                    'surge' => $surge,
-                    'surge_value' => $surge_percentage,
-                    'tax_price' => $tax_price,
-                    'base_price' => $service_type->fixed,
-                    'wallet_balance' => Auth::user()->wallet_balance
-                ]);
-
-        } catch(Exception $e) {
+                'estimated_fare' => round($total, 2),
+                'distance' => $kilometer,
+                'time' => $time,
+                'surge' => $surge,
+                'surge_value' => $surge_percentage,
+                'tax_price' => $tax_price,
+                'base_price' => $service_type->fixed,
+                'wallet_balance' => Auth::user()->wallet_balance
+            ]);
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
@@ -847,38 +836,37 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function trip_details(Request $request) {
+    public function trip_details(Request $request)
+    {
 
-         $this->validate($request, [
-                'request_id' => 'required|integer|exists:user_requests,id',
-            ]);
-    
-        try{
+        $this->validate($request, [
+            'request_id' => 'required|integer|exists:user_requests,id',
+        ]);
+
+        try {
             $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.id', $request->request_id)
-            ->where('user_requests.status', 'COMPLETED')
-            ->select('user_requests.*')
-            ->with('payment','service_type','user','provider','rating')
-            ->get();
-            if(!empty($UserRequests)){
+                ->where('user_requests.id', $request->request_id)
+                ->where('user_requests.status', 'COMPLETED')
+                ->select('user_requests.*')
+                ->with('payment', 'service_type', 'user', 'provider', 'rating')
+                ->get();
+            if (!empty($UserRequests)) {
                 $map_icon = asset('asset/img/marker-start.png');
                 foreach ($UserRequests as $key => $value) {
-                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
-                            "autoscale=1".
-                            "&size=320x130".
-                            "&maptype=terrian".
-                            "&format=png".
-                            "&visual_refresh=true".
-                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
-                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
-                            "&path=color:0x191919|weight:3|enc:".$value->route_key.
-                            "&key=".Setting::get('map_key');
+                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?" .
+                        "autoscale=1" .
+                        "&size=320x130" .
+                        "&maptype=terrian" .
+                        "&format=png" .
+                        "&visual_refresh=true" .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->s_latitude . "," . $value->s_longitude .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->d_latitude . "," . $value->d_longitude .
+                        "&path=color:0x191919|weight:3|enc:" . $value->route_key .
+                        "&key=" . Setting::get('map_key');
                 }
             }
             return $UserRequests;
-        }
-
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')]);
         }
     }
@@ -889,19 +877,19 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function promocodes() {
-        try{
+    public function promocodes()
+    {
+        try {
             //$this->check_expiry();
 
             return PromocodeUsage::Active()
-                    ->where('user_id', Auth::user()->id)
-                    ->with('promocode')
-                    ->get();
-
+                ->where('user_id', Auth::user()->id)
+                ->with('promocode')
+                ->get();
         } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
-    } 
+    }
 
 
     /*public function check_expiry(){
@@ -936,43 +924,40 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function add_promocode(Request $request) {
+    public function add_promocode(Request $request)
+    {
 
         $this->validate($request, [
-                'promocode' => 'required|exists:promocodes,promo_code',
-            ]);
+            'promocode' => 'required|exists:promocodes,promo_code',
+        ]);
 
-        try{
+        try {
 
-            $find_promo = Promocode::where('promo_code',$request->promocode)->first();
+            $find_promo = Promocode::where('promo_code', $request->promocode)->first();
 
-            if($find_promo->status == 'EXPIRED' || (date("Y-m-d") > $find_promo->expiration)){
+            if ($find_promo->status == 'EXPIRED' || (date("Y-m-d") > $find_promo->expiration)) {
 
-                if($request->ajax()){
+                if ($request->ajax()) {
 
                     return response()->json([
-                        'message' => trans('api.promocode_expired'), 
+                        'message' => trans('api.promocode_expired'),
                         'code' => 'promocode_expired'
                     ]);
-
-                }else{
+                } else {
                     return back()->with('flash_error', trans('api.promocode_expired'));
                 }
+            } elseif (PromocodeUsage::where('promocode_id', $find_promo->id)->where('user_id', Auth::user()->id)->whereIN('status', ['ADDED', 'USED'])->count() > 0) {
 
-            }elseif(PromocodeUsage::where('promocode_id',$find_promo->id)->where('user_id', Auth::user()->id)->whereIN('status',['ADDED','USED'])->count() > 0){
-
-                if($request->ajax()){
+                if ($request->ajax()) {
 
                     return response()->json([
-                        'message' => trans('api.promocode_already_in_use'), 
+                        'message' => trans('api.promocode_already_in_use'),
                         'code' => 'promocode_already_in_use'
-                        ]);
-
-                }else{
+                    ]);
+                } else {
                     return back()->with('flash_error', 'Promocode Already in use');
                 }
-
-            }else{
+            } else {
 
                 $promo = new PromocodeUsage;
                 $promo->promocode_id = $find_promo->id;
@@ -981,34 +966,29 @@ class UserApiController extends Controller
                 $promo->save();
 
                 PromocodePassbook::create([
-                            'user_id' => Auth::user()->id,
-                            'status' => 'ADDED',
-                            'promocode_id' => $find_promo->id
-                        ]);
+                    'user_id' => Auth::user()->id,
+                    'status' => 'ADDED',
+                    'promocode_id' => $find_promo->id
+                ]);
 
-                if($request->ajax()){
+                if ($request->ajax()) {
 
                     return response()->json([
-                            'message' => trans('api.promocode_applied') ,
-                            'code' => 'promocode_applied'
-                         ]); 
-
-                }else{
+                        'message' => trans('api.promocode_applied'),
+                        'code' => 'promocode_applied'
+                    ]);
+                } else {
                     return back()->with('flash_success', trans('api.promocode_applied'));
                 }
             }
-
-        }
-
-        catch (Exception $e) {
-            if($request->ajax()){
+        } catch (Exception $e) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
+            } else {
                 return back()->with('flash_error', 'Something Went Wrong');
             }
         }
-
-    } 
+    }
 
     /**
      * Show the application dashboard.
@@ -1016,34 +996,33 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function upcoming_trips() {
-    
-        try{
+    public function upcoming_trips()
+    {
+
+        try {
             $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.status', 'SCHEDULED')
-            ->orderBy('user_requests.created_at','desc')
-            ->select('user_requests.*')
-            ->with('service_type','provider')
-            ->get();
-            if(!empty($UserRequests)){
+                ->where('user_requests.status', 'SCHEDULED')
+                ->orderBy('user_requests.created_at', 'desc')
+                ->select('user_requests.*')
+                ->with('service_type', 'provider')
+                ->get();
+            if (!empty($UserRequests)) {
                 $map_icon = asset('asset/img/marker-start.png');
                 foreach ($UserRequests as $key => $value) {
-                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
-                            "autoscale=1".
-                            "&size=320x130".
-                            "&maptype=terrian".
-                            "&format=png".
-                            "&visual_refresh=true".
-                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
-                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
-                            "&path=color:0x000000|weight:3|enc:".$value->route_key.
-                            "&key=".Setting::get('map_key');
+                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?" .
+                        "autoscale=1" .
+                        "&size=320x130" .
+                        "&maptype=terrian" .
+                        "&format=png" .
+                        "&visual_refresh=true" .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->s_latitude . "," . $value->s_longitude .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->d_latitude . "," . $value->d_longitude .
+                        "&path=color:0x000000|weight:3|enc:" . $value->route_key .
+                        "&key=" . Setting::get('map_key');
                 }
             }
             return $UserRequests;
-        }
-
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')]);
         }
     }
@@ -1054,33 +1033,32 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function upcoming_trip_details(Request $request) {
+    public function upcoming_trip_details(Request $request)
+    {
 
-         $this->validate($request, [
-                'request_id' => 'required|integer|exists:user_requests,id',
-            ]);
-    
-        try{
-            $UserRequests = UserRequests::UserUpcomingTripDetails(Auth::user()->id,$request->request_id)->get();
-            if(!empty($UserRequests)){
+        $this->validate($request, [
+            'request_id' => 'required|integer|exists:user_requests,id',
+        ]);
+
+        try {
+            $UserRequests = UserRequests::UserUpcomingTripDetails(Auth::user()->id, $request->request_id)->get();
+            if (!empty($UserRequests)) {
                 $map_icon = asset('asset/img/marker-start.png');
                 foreach ($UserRequests as $key => $value) {
-                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
-                            "autoscale=1".
-                            "&size=320x130".
-                            "&maptype=terrian".
-                            "&format=png".
-                            "&visual_refresh=true".
-                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
-                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
-                            "&path=color:0x000000|weight:3|enc:".$value->route_key.
-                            "&key=".Setting::get('map_key');
+                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?" .
+                        "autoscale=1" .
+                        "&size=320x130" .
+                        "&maptype=terrian" .
+                        "&format=png" .
+                        "&visual_refresh=true" .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->s_latitude . "," . $value->s_longitude .
+                        "&markers=icon:" . $map_icon . "%7C" . $value->d_latitude . "," . $value->d_longitude .
+                        "&path=color:0x000000|weight:3|enc:" . $value->route_key .
+                        "&key=" . Setting::get('map_key');
                 }
             }
             return $UserRequests;
-        }
-
-        catch (Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => trans('api.something_went_wrong')]);
         }
     }
@@ -1092,35 +1070,35 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function show_providers(Request $request) {
+    public function show_providers(Request $request)
+    {
 
         $this->validate($request, [
-                'latitude' => 'required|numeric',
-                'longitude' => 'required|numeric',
-                'service' => 'numeric|exists:service_types,id',
-            ]);
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'service' => 'numeric|exists:service_types,id',
+        ]);
 
-        try{
+        try {
 
             $distance = Setting::get('provider_search_radius', '10');
             $latitude = $request->latitude;
             $longitude = $request->longitude;
 
-            if($request->has('service')){
+            if ($request->has('service')) {
 
                 $ActiveProviders = ProviderService::where('service_type_id', $request->service)
-                ->where('status', 'active')
-                ->get()->pluck('provider_id');
+                    ->where('status', 'active')
+                    ->get()->pluck('provider_id');
 
                 $Providers = Provider::with('service')->whereIn('id', $ActiveProviders)
                     ->where('status', 'approved')
                     ->whereRaw("(1.609344 * 3956 * acos( cos( radians('$latitude') ) * cos( radians(latitude) ) * cos( radians(longitude) - radians('$longitude') ) + sin( radians('$latitude') ) * sin( radians(latitude) ) ) ) <= $distance")
                     ->get();
-
             } else {
 
                 $ActiveProviders = ProviderService::where('status', 'active')
-                                    ->get()->pluck('provider_id');
+                    ->get()->pluck('provider_id');
 
                 $Providers = Provider::with('service')->whereIn('id', $ActiveProviders)
                     ->where('status', 'approved')
@@ -1128,13 +1106,12 @@ class UserApiController extends Controller
                     ->get();
             }
 
-        
-            return $Providers;
 
+            return $Providers;
         } catch (Exception $e) {
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')], 500);
-            }else{
+            } else {
                 return back()->with('flash_error', 'Something went wrong while sending request. Please try again.');
             }
         }
@@ -1148,15 +1125,16 @@ class UserApiController extends Controller
      */
 
 
-    public function forgot_password(Request $request){
+    public function forgot_password(Request $request)
+    {
 
         $this->validate($request, [
-                'email' => 'required|email|exists:users,email',
-            ]);
+            'email' => 'required|email|exists:users,email',
+        ]);
 
-        try{  
-            
-            $user = User::where('email' , $request->email)->first();
+        try {
+
+            $user = User::where('email', $request->email)->first();
 
             $otp = mt_rand(100000, 999999);
 
@@ -1169,9 +1147,8 @@ class UserApiController extends Controller
                 'message' => 'OTP sent to your email!',
                 'user' => $user
             ]);
-
-        }catch(Exception $e){
-                return response()->json(['error' => trans('api.something_went_wrong')], 500);
+        } catch (Exception $e) {
+            return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
 
@@ -1182,15 +1159,16 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function reset_password(Request $request){
+    public function reset_password(Request $request)
+    {
 
         $this->validate($request, [
-                'password' => 'required|confirmed|min:6',
-                'id' => 'required|numeric|exists:users,id'
+            'password' => 'required|confirmed|min:6',
+            'id' => 'required|numeric|exists:users,id'
 
-            ]);
+        ]);
 
-        try{
+        try {
 
             $User = User::findOrFail($request->id);
             // $UpdatedAt = date_create($User->updated_at);
@@ -1199,14 +1177,11 @@ class UserApiController extends Controller
             // $ExpiredMin = $ExpiredAt->i;
             $User->password = bcrypt($request->password);
             $User->save();
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json(['message' => 'Password Updated']);
             }
-           
-            
-
-        }catch (Exception $e) {
-            if($request->ajax()) {
+        } catch (Exception $e) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')]);
             }
         }
@@ -1218,19 +1193,19 @@ class UserApiController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function help_details(Request $request){
+    public function help_details(Request $request)
+    {
 
-        try{
+        try {
 
-            if($request->ajax()) {
+            if ($request->ajax()) {
                 return response()->json([
-                    'contact_number' => Setting::get('contact_number',''), 
-                    'contact_email' => Setting::get('contact_email','')
-                     ]);
+                    'contact_number' => Setting::get('contact_number', ''),
+                    'contact_email' => Setting::get('contact_email', '')
+                ]);
             }
-
-        }catch (Exception $e) {
-            if($request->ajax()) {
+        } catch (Exception $e) {
+            if ($request->ajax()) {
                 return response()->json(['error' => trans('api.something_went_wrong')]);
             }
         }
@@ -1246,15 +1221,14 @@ class UserApiController extends Controller
     public function verify(Request $request)
     {
         $this->validate($request, [
-                'email' => 'required|email|max:255|unique:users',
-            ]);
+            'email' => 'required|email|max:255|unique:users',
+        ]);
 
-        try{
-            
+        try {
+
             return response()->json(['message' => trans('api.email_available')]);
-
         } catch (Exception $e) {
-             return response()->json(['error' => trans('api.something_went_wrong')], 500);
+            return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
 
@@ -1268,12 +1242,11 @@ class UserApiController extends Controller
 
     public function wallet_passbook(Request $request)
     {
-        try{
-            
-            return WalletPassbook::where('user_id',Auth::user()->id)->get();
+        try {
 
+            return WalletPassbook::where('user_id', Auth::user()->id)->get();
         } catch (Exception $e) {
-             return response()->json(['error' => trans('api.something_went_wrong')], 500);
+            return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
 
@@ -1286,71 +1259,65 @@ class UserApiController extends Controller
 
     public function promo_passbook(Request $request)
     {
-        try{
-            
-            return PromocodePassbook::where('user_id',Auth::user()->id)->with('promocode')->get();
+        try {
 
+            return PromocodePassbook::where('user_id', Auth::user()->id)->with('promocode')->get();
         } catch (Exception $e) {
-             return response()->json(['error' => trans('api.something_went_wrong')], 500);
+            return response()->json(['error' => trans('api.something_went_wrong')], 500);
         }
     }
 
-    public function add_video_reward(Request $request) {
+    public function add_video_reward(Request $request)
+    {
 
         try {
 
-            if($user = User::find(Auth::user()->id)) {
+            if ($user = User::find(Auth::user()->id)) {
 
                 $user->wallet_balance += Setting::get('video_reward');
 
                 $user->save();
 
                 return response()->json(['status' => true]);
-            }
-
-            else {
+            } else {
                 return response()->json(['error' => trans('api.user.user_not_found')], 500);
             }
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['status' => false]);
         }
-
-        catch (ModelNotFoundException $e) {
-            return response()->json(['status'=>false]);
-        }
-
     }
 
     public function getHome()
     {
-            $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
-            ->where('user_requests.status','COMPLETED')
-            ->orderBy('user_requests.created_at','desc')
+        $UserRequests = UserRequests::where('user_requests.user_id', Auth::user()->id)
+            ->where('user_requests.status', 'COMPLETED')
+            ->orderBy('user_requests.created_at', 'desc')
             ->select('user_requests.*')
-            ->with('payment','service_type')
+            ->with('payment', 'service_type')
             ->take(3)
             ->get();
 
-            if(!empty($UserRequests)){
-                $map_icon = asset('asset/img/marker-start.png');
-                foreach ($UserRequests as $key => $value) {
-                    $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?".
-                            "autoscale=1".
-                            "&size=320x130".
-                            "&maptype=terrian".
-                            "&format=png".
-                            "&visual_refresh=true".
-                            "&markers=icon:".$map_icon."%7C".$value->s_latitude.",".$value->s_longitude.
-                            "&markers=icon:".$map_icon."%7C".$value->d_latitude.",".$value->d_longitude.
-                            "&path=color:0x191919|weight:3|enc:".$value->route_key.
-                            "&key=".Setting::get('map_key');
-                }
+        if (!empty($UserRequests)) {
+            $map_icon = asset('asset/img/marker-start.png');
+            foreach ($UserRequests as $key => $value) {
+                $UserRequests[$key]->static_map = "https://maps.googleapis.com/maps/api/staticmap?" .
+                    "autoscale=1" .
+                    "&size=320x130" .
+                    "&maptype=terrian" .
+                    "&format=png" .
+                    "&visual_refresh=true" .
+                    "&markers=icon:" . $map_icon . "%7C" . $value->s_latitude . "," . $value->s_longitude .
+                    "&markers=icon:" . $map_icon . "%7C" . $value->d_latitude . "," . $value->d_longitude .
+                    "&path=color:0x191919|weight:3|enc:" . $value->route_key .
+                    "&key=" . Setting::get('map_key');
             }
+        }
 
-        $response['providers'] = Provider::orderBy('created_at','desc')->get();
+        $response['providers'] = Provider::orderBy('created_at', 'desc')->get();
         $response['recent_pickups'] = $UserRequests;
-        
+
         return response()->json([
-            'data' => $response, 
+            'data' => $response,
         ]);
     }
-
 }
